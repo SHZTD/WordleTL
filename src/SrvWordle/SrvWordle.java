@@ -7,13 +7,18 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class SrvWordle {
-    public String obtenerPalabra() {
+    /*
+        TODO:
+        Implementar la logica entera del servidor UDP
+     */
+
+    public static String obtenerPalabra() {
         // setup de linea random
         Random rnd = new Random();
         int index =  rnd.nextInt(0, 100);
 
         // obten el path para el file
-        String path = SrvWordle.class.getResource("palabras").getFile();
+        String path = SrvWordle.class.getResource("palabras").getFile(); // explota si no hay archivo asi que
         File file = new File(path);
 
         // instancia el scanner
