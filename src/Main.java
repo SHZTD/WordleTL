@@ -6,6 +6,6 @@ public class Main {
             testing del server
          */
         SrvWordle srv = new SrvWordle();
-        System.out.println(srv.obtenerPalabra());
+        srv.logicaWordle();
     }
 }
