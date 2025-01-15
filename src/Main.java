@@ -1,8 +1,8 @@
+import SrvWordle.SrvWordle;
+
 public class Main {
     public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            System.out.printf("asdfasff!");
-        }
-        // hello world
+        SrvWordle srv = new SrvWordle();
+        System.out.println(srv.obtenerPalabra());
     }
 }
