@@ -1,11 +1,12 @@
 import SrvWordle.SrvWordle;
+import Wordle.Wordle;
 
 public class Main {
     public static void main(String[] args) {
         /*
             testing del server
          */
-        SrvWordle srv = new SrvWordle();
-        srv.logicaWordle();
+        Wordle w = new Wordle();
+        w.logicaWordle();
     }
 }
