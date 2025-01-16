@@ -3,93 +3,75 @@ package SrvWordle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
 public class SrvWordle {
-    private String obtenerPalabra() {
-        // setup de linea random
-        Random rnd = new Random();
-        int index =  rnd.nextInt(0, 100);
-
-        // obten el path para el file
-        String path = SrvWordle.class.getResource("palabras").getFile(); // explota si no hay archivo asi que
-        File file = new File(path);
-
-        // instancia el scanner
-        Scanner srcfile = null;
-        try {
-            srcfile = new Scanner(file);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        // almacena el archivo (mal optimizado, clase PATH)
-        ArrayList<String> palabraRandom = new ArrayList<>();
-        int linea = 0;
-        while (srcfile.hasNextLine()) {
-            palabraRandom.add(srcfile.nextLine());
-            linea++;
-            if (linea == index) {
-                break; // deja de leer el archivo entero
+    private List<String> cargarPalabras(String nombreArchivo) {
+        List<String> palabras = new ArrayList<>();
+        try (Scanner scanner = new Scanner(new File(nombreArchivo))) {
+            while (scanner.hasNextLine()) {
+                palabras.add(scanner.nextLine().trim());
             }
+        } catch (FileNotFoundException e) {
+            System.err.println("Archivo no encontrado: " + nombreArchivo);
+            throw new RuntimeException("No se pudo cargar el archivo de palabras.", e);
         }
+        return palabras;
+    }
 
-        System.out.println(index);
-        // retorna la palabra
-        return palabraRandom.get(index < 0 ? index : index - 1);
+    private String obtenerPalabra(List<String> palabras) {
+        Random rnd = new Random();
+        return palabras.get(rnd.nextInt(palabras.size()));
     }
 
     public void logicaWordle() {
-        /*
-            Los souts estan por debug
-            TODO:
-                Se verifica la posicion de la letra (los verdes en wordle)
-                Se tiene que verificar si la letra "existe" en el contexto de la palabra (los naranjas)
-         */
+        String path = SrvWordle.class.getResource("palabras").getFile();
+        List<String> palabras = cargarPalabras(path);
 
-        char[] palabraArray = obtenerPalabra().toCharArray(); // almacena la palabra en un array de chars
-        int lpArray = palabraArray.length;
-        System.out.println("La palabra tiene " + lpArray + " letras.");
-        for (int i = 0; i < lpArray; i++) {
-            System.out.print("_ ");
-        }
-        // nueva linea
-        System.out.print("\n");
+        // selecciona una palabra random
+        String palabra = obtenerPalabra(palabras);
+        char[] palabraArray = palabra.toCharArray();
+        int longitudPalabra = palabraArray.length;
 
-        // instancia un input
+        System.out.println("La palabra tiene " + longitudPalabra + " letras.");
+        System.out.println("_ ".repeat(longitudPalabra));
+
+        // input & logica wordle
         Scanner input = new Scanner(System.in);
         final int INTENTOS = 7;
-        int intentoActual = 0;
-        while (intentoActual != INTENTOS) {
-            char[] inputString = input.nextLine().toCharArray();
-            int lpInputString = inputString.length;
-            if (lpInputString > lpArray) {
-                System.out.println("La palabra no coincide con el tamaño!");
-            } else {
-                // al ser del mismo lenght, se pueden recorrer ambas
-                intentoActual++;
-                int c = 0;
+        for (int intento = 1; intento <= INTENTOS; intento++) {
+            System.out.print("Intento " + intento + "/" + INTENTOS + ": ");
+            String entrada = input.nextLine().trim();
 
-                // comprueba todas las posiciones si estan OK o no
-                for (int i = 0; i < lpInputString; i++) {
-                    if (inputString[i] == palabraArray[i]) {
-                        System.out.println("La letra en la posicion " + i + " son correctas.");
-                        c++;
-                    } else {
-                        System.out.println("Nope, la posicion " + i + " estan mal.");
-                    }
-                }
+            if (entrada.length() != longitudPalabra) {
+                System.out.println("La palabra debe tener exactamente " + longitudPalabra + " letras.");
+                continue;
+            }
 
-                // mira si se cumple la condicion
-                if (c == palabraArray.length) {
-                    System.out.println("Palabra encontrada! Fin del juego.");
-                    return;
+            char[] inputArray = entrada.toCharArray();
+            boolean palabraEncontrada = true;
+
+            // comparar las letras
+            for (int i = 0; i < longitudPalabra; i++) {
+                if (inputArray[i] == palabraArray[i]) {
+                    System.out.print("[" + inputArray[i] + "] "); // letra correcta y en posición correcta
+                } else if (palabra.contains(String.valueOf(inputArray[i]))) {
+                    System.out.print("(" + inputArray[i] + ") "); // letra correcta pero en posición incorrecta
+                    palabraEncontrada = false;
                 } else {
-                    System.out.println("Tienes que volver a probar la palabra.");
+                    System.out.print("_ "); // letra incorrecta
+                    palabraEncontrada = false;
                 }
             }
+            System.out.println();
+
+            if (palabraEncontrada) {
+                System.out.println("Has encontrado la palabra.");
+                return;
+            }
         }
-        System.out.println("Intentos superados, fin del juego");
+        System.out.println("Se acabaron los intentos. La palabra era: " + palabra);
     }
 }
