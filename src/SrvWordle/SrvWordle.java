@@ -7,6 +7,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
+/*
+    TODO:
+        [X] Logica wordle hecha
+        [ ] Servidor UDP/TCP para obtener jugadores
+        [ ] Hacer los turnos y el JugadorWordle
+ */
+
 public class SrvWordle {
     private List<String> cargarPalabras(String nombreArchivo) {
         List<String> palabras = new ArrayList<>();
@@ -24,7 +31,7 @@ public class SrvWordle {
     private String obtenerPalabra(List<String> palabras) {
         Random rnd = new Random();
         int p = rnd.nextInt(palabras.size());
-        System.out.println(p);
+        // System.out.println(p);
         return palabras.get(p);
     }
 
