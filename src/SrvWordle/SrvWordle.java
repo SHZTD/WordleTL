@@ -23,7 +23,9 @@ public class SrvWordle {
 
     private String obtenerPalabra(List<String> palabras) {
         Random rnd = new Random();
-        return palabras.get(rnd.nextInt(palabras.size()));
+        int p = rnd.nextInt(palabras.size());
+        System.out.println(p);
+        return palabras.get(p);
     }
 
     public void logicaWordle() {
@@ -42,11 +44,12 @@ public class SrvWordle {
         Scanner input = new Scanner(System.in);
         final int INTENTOS = 7;
         for (int intento = 1; intento <= INTENTOS; intento++) {
-            System.out.print("Intento " + intento + "/" + INTENTOS + ": ");
+            System.out.print("Intento " + intento + "/" + INTENTOS + ":\n");
             String entrada = input.nextLine().trim();
 
             if (entrada.length() != longitudPalabra) {
                 System.out.println("La palabra debe tener exactamente " + longitudPalabra + " letras.");
+                intento--; // no interesa que se sume el intento
                 continue;
             }
 
