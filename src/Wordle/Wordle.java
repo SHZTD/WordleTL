@@ -24,7 +24,7 @@ public class Wordle {
     private String obtenerPalabra(List<String> palabras) {
         Random rnd = new Random();
         int p = rnd.nextInt(palabras.size());
-        System.out.println(p);
+        System.out.println(p + 1);
         return palabras.get(p);
     }
 

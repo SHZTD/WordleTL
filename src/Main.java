@@ -1,10 +1,9 @@
-import SrvWordle.SrvWordle;
 import Wordle.Wordle;
 
 public class Main {
     public static void main(String[] args) {
         /*
-            testing del server
+            main testing stuff
          */
         Wordle w = new Wordle();
         w.logicaWordle();
