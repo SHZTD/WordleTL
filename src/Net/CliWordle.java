@@ -1,24 +1,16 @@
+
 package Net;
 
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
 
-/**
- * Created by jordi
- * Exemple Client UDP extret dels apunts del IOC i ampliat
- * El server és DatagramSocketServer
- *
- * Aquest client reb del server el mateix que se li envia
- * Si s'envia adeu s'acaba la connexió
- */
-
 public class CliWordle {
-    InetAddress serverIP;
-    int serverPort;
-    DatagramSocket socket;
-    Scanner sc;
-    String nom;
+    private InetAddress serverIP;
+    private int serverPort;
+    private DatagramSocket socket;
+    private Scanner sc;
+    private String nombre;
 
     public CliWordle() {
         sc = new Scanner(System.in);
@@ -31,51 +23,37 @@ public class CliWordle {
     }
 
     public void runClient() throws IOException {
-        byte [] receivedData = new byte[1024];
-        byte [] sendingData;
+        byte[] receivedData = new byte[1024];
+        byte[] sendingData = getFirstRequest();
 
-        sendingData = getFirstRequest();
-        while (mustContinue(sendingData)) {
-            DatagramPacket packet = new DatagramPacket(sendingData,sendingData.length,serverIP,serverPort);
+        while (true) {
+            DatagramPacket packet = new DatagramPacket(sendingData, sendingData.length, serverIP, serverPort);
             socket.send(packet);
-            packet = new DatagramPacket(receivedData,1024);
+            packet = new DatagramPacket(receivedData, receivedData.length);
             socket.receive(packet);
-            sendingData = getDataToRequest(packet.getData(), packet.getLength());
+            System.out.println("Respuesta del servidor: " + new String(packet.getData(), 0, packet.getLength()));
+            sendingData = getDataToRequest();
         }
-
     }
 
-    //Resta de conversa que se li envia al server
-    private byte[] getDataToRequest(byte[] data, int length) {
-        String rebut = new String(data,0, length);
-        //Imprimeix el nom del client + el que es rep del server i demana més dades
-        System.out.print(nom+"("+rebut+")"+"> ");
-        String msg = sc.nextLine();
-        return msg.getBytes();
-    }
-
-    //primer missatge que se li envia al server
     private byte[] getFirstRequest() {
-        System.out.println("Entra el teu nom: ");
-        nom = sc.nextLine();
-        return nom.getBytes();
+        System.out.println("Introduce tu nombre: ");
+        nombre = sc.nextLine();
+        return nombre.getBytes();
     }
 
-    //Si se li diu adeu al server, el client es desconnecta
-    public boolean mustContinue(byte [] data) {
-        String msg = new String(data).toLowerCase();
-        return !msg.equals("adeu");
+    private byte[] getDataToRequest() {
+        System.out.print(nombre + "> ");
+        return sc.nextLine().getBytes();
     }
 
     public static void main(String[] args) {
-        CliWordle client = new CliWordle();
         try {
+            CliWordle client = new CliWordle();
             client.init("localhost", 7484);
             client.runClient();
         } catch (IOException e) {
-            e.getStackTrace();
+            e.printStackTrace();
         }
-
     }
-
 }
