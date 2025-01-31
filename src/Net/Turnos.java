@@ -16,8 +16,11 @@ public class Turnos {
     public synchronized boolean siguienteTurno() {
         if (turnoActual < maxTurnos) {
             turnoActual++;
+            notifyAll();
             return true;
+
         }
+        notifyAll();
         return false; // No hay más turnos
     }
 
@@ -32,10 +35,13 @@ public class Turnos {
     public synchronized void cambiarJugador() {
         if (++jugadorActual > maxJugadores) {
             jugadorActual = 1;
+            notifyAll();
         }
     }
 
     public synchronized boolean esUltimoTurno() {
+
         return turnoActual >= maxTurnos;
+
     }
 }

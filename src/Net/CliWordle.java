@@ -1,4 +1,3 @@
-
 package Net;
 
 import java.io.IOException;
@@ -24,27 +23,41 @@ public class CliWordle {
 
     public void runClient() throws IOException {
         byte[] receivedData = new byte[1024];
-        byte[] sendingData = getFirstRequest();
+        byte[] sendingData;
 
+        sendingData = getFirstRequest();
         while (true) {
             DatagramPacket packet = new DatagramPacket(sendingData, sendingData.length, serverIP, serverPort);
             socket.send(packet);
+
             packet = new DatagramPacket(receivedData, receivedData.length);
             socket.receive(packet);
-            System.out.println("Respuesta del servidor: " + new String(packet.getData(), 0, packet.getLength()));
-            sendingData = getDataToRequest();
+            String response = new String(packet.getData(), 0, packet.getLength());
+
+            System.out.println(response);
+
+            if (response.contains("¡Has ganado!") || response.contains("Se acabaron los intentos")) {
+                break;
+            }
+
+            if (response.contains("No es tu turno")) {
+                continue;
+            }
+
+            sendingData = getNextWordAttempt();
         }
     }
 
     private byte[] getFirstRequest() {
-        System.out.println("Introduce tu nombre: ");
+        System.out.print("Ingresa tu nombre: ");
         nombre = sc.nextLine();
         return nombre.getBytes();
     }
 
-    private byte[] getDataToRequest() {
-        System.out.print(nombre + "> ");
-        return sc.nextLine().getBytes();
+    private byte[] getNextWordAttempt() {
+        System.out.print("Introduce tu intento: ");
+        String msg = sc.nextLine();
+        return msg.getBytes();
     }
 
     public static void main(String[] args) {

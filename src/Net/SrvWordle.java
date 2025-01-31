@@ -1,3 +1,4 @@
+
 package Net;
 
 import Wordle.Wordle;
@@ -18,12 +19,11 @@ public class SrvWordle {
     private char[] palabraArray;
     private int intentosRestantes = 7;
     private Turnos turnManager;
-    private int maxTurnos, maxJugadores;
     private Map<String, Integer> intentosPorJugador = new HashMap<>();
 
     public void init(int port) throws SocketException {
         socket = new DatagramSocket(port);
-        turnManager = new Turnos(maxTurnos, maxJugadores);
+        turnManager = new Turnos();
         palabra = wordle.obtenerPalabra();
         palabraArray = palabra.toCharArray();
     }

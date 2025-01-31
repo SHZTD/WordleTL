@@ -5,7 +5,5 @@ public class Main {
         /*
             main testing stuff
          */
-        Wordle w = new Wordle();
-        w.logicaWordle();
     }
 }
