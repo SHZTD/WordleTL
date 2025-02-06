@@ -40,7 +40,7 @@ public class CliWordle {
                 break;
             }
 
-            if (response.contains("No es tu turno")) {
+            if (response.contains("No es tu turno es turno de: "+ nombre)) {
                 continue;
             }
 
