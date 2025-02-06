@@ -1,47 +1,28 @@
 package Net;
 
-public class Turnos {
-    private final int maxTurnos;
-    private int turnoActual;
-    private final int maxJugadores;
-    private int jugadorActual;
+import java.util.ArrayList;
+import java.util.List;
 
-    public Turnos(int maxTurnos, int maxJugadores) {
-        this.maxTurnos = maxTurnos;
-        this.turnoActual = 1;
-        this.maxJugadores = maxJugadores;
-        this.jugadorActual = 1;
+class Turnos {
+    private final List<String> players;
+    private int currentTurnIndex;
+
+    public Turnos() {
+        this.players = new ArrayList<>();
+        this.currentTurnIndex = 0;
     }
 
-    public synchronized boolean siguienteTurno() {
-        if (turnoActual < maxTurnos) {
-            turnoActual++;
-            notifyAll();
-            return true;
-
-        }
-        notifyAll();
-        return false; // No hay más turnos
-    }
-
-    public synchronized int getTurnoActual() {
-        return turnoActual;
-    }
-
-    public synchronized int getJugadorActual() {
-        return jugadorActual;
-    }
-
-    public synchronized void cambiarJugador() {
-        if (++jugadorActual > maxJugadores) {
-            jugadorActual = 1;
-            notifyAll();
+    public void addPlayer(String playerId) {
+        if (!players.contains(playerId)) {
+            players.add(playerId);
         }
     }
 
-    public synchronized boolean esUltimoTurno() {
+    public boolean isPlayerTurn(String playerId) {
+        return players.get(currentTurnIndex).equals(playerId);
+    }
 
-        return turnoActual >= maxTurnos;
-
+    public void nextTurn() {
+        currentTurnIndex = (currentTurnIndex + 1) % players.size();
     }
 }

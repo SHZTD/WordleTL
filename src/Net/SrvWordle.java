@@ -1,4 +1,3 @@
-
 package Net;
 
 import Wordle.Wordle;
@@ -40,23 +39,19 @@ public class SrvWordle {
             String request = new String(packet.getData(), 0, packet.getLength()).trim();
             String clientId = clientIP.toString() + ":" + clientPort;
 
-            // Agregar jugador si no está en la lista
             if (!intentosPorJugador.containsKey(clientId)) {
                 intentosPorJugador.put(clientId, 0);
                 turnManager.addPlayer(clientId);
             }
 
-            // Si no es su turno, lo ignoramos
             if (!turnManager.isPlayerTurn(clientId)) {
                 sendMessage("No es tu turno. Espera.", clientIP, clientPort);
                 continue;
             }
 
-            // Procesamos el intento del jugador
             String response = processWordleLogic(request, clientId);
             sendMessage(response, clientIP, clientPort);
 
-            // Pasamos el turno al siguiente jugador
             turnManager.nextTurn();
         }
     }
