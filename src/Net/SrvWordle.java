@@ -19,14 +19,13 @@ public class SrvWordle {
     private int intentosRestantes = 7;
     private Turnos turnManager;
     private Map<String, Integer> intentosPorJugador = new HashMap<>();
-    private Map<String, String> nombresPorJugador = new HashMap<>();
 
     public void init(int port) throws SocketException {
         socket = new DatagramSocket(port);
         turnManager = new Turnos();
-        palabra = wordle.obtenerPalabra().trim();
+        palabra = wordle.obtenerPalabra();
         palabraArray = palabra.toCharArray();
-        System.out.println("Palabra a adivinar: " + palabra);  // Debugging
+        System.out.println("Palabra a adivinar: " + palabra);
     }
 
     public void runServer() throws IOException {
@@ -39,42 +38,35 @@ public class SrvWordle {
             clientPort = packet.getPort();
 
             String request = new String(packet.getData(), 0, packet.getLength()).trim();
-            String clientId = clientIP.getHostAddress() + ":" + clientPort;
+            String clientId = clientIP.toString() + ":" + clientPort;
 
-            // Si el cliente es nuevo, registrar nombre y agregar a turnos
-            if (!nombresPorJugador.containsKey(clientId)) {
-                nombresPorJugador.put(clientId, request);
+            // Agregar jugador si no está en la lista
+            if (!intentosPorJugador.containsKey(clientId)) {
                 intentosPorJugador.put(clientId, 0);
                 turnManager.addPlayer(clientId);
-                sendMessage("Bienvenido, " + request + "! Espera tu turno.", clientIP, clientPort);
-                continue;
             }
 
-            String nombreJugador = nombresPorJugador.get(clientId);
-
+            // Si no es su turno, lo ignoramos
             if (!turnManager.isPlayerTurn(clientId)) {
-                String jugadorEnTurno = nombresPorJugador.get(turnManager.getCurrentPlayerId());
-                sendMessage("No es tu turno. Ahora es el turno de " + jugadorEnTurno + ".", clientIP, clientPort);
+                sendMessage("No es tu turno. Espera. Tamaño palabra: " + palabraArray.length, clientIP, clientPort);
                 continue;
             }
 
-            String response = processWordleLogic(request, clientId, nombreJugador);
+            // Procesamos el intento del jugador
+            String response = processWordleLogic(request, clientId);
             sendMessage(response, clientIP, clientPort);
-
-            // Solo cambiar de turno si no ha ganado
-            if (!response.contains("¡Felicidades")) {
-                turnManager.nextTurn();
-                String siguienteJugadorId = turnManager.getCurrentPlayerId();
-                String siguienteJugadorNombre = nombresPorJugador.get(siguienteJugadorId);
-                InetAddress siguienteIP = InetAddress.getByName(siguienteJugadorId.split(":")[0]);
-                int siguientePort = Integer.parseInt(siguienteJugadorId.split(":")[1]);
-                sendMessage("Es tu turno, " + siguienteJugadorNombre + ". Introduce tu intento.", siguienteIP, siguientePort);
-            }
+            // Pasamos el turno al siguiente jugador
+            turnManager.nextTurn();
         }
     }
 
-    private String processWordleLogic(String input, String clientId, String nombreJugador) {
-        input = input.trim(); // Asegurarse de eliminar espacios adicionales
+    private void sendMessage(String message, InetAddress ip, int port) throws IOException {
+        byte[] sendingData = message.getBytes();
+        DatagramPacket packet = new DatagramPacket(sendingData, sendingData.length, ip, port);
+        socket.send(packet);
+    }
+
+    private String processWordleLogic(String input, String clientId) {
 
         if (input.length() != palabraArray.length) {
             return "La palabra debe tener " + palabraArray.length + " letras.";
@@ -99,20 +91,14 @@ public class SrvWordle {
         intentosPorJugador.put(clientId, intentosPorJugador.get(clientId) + 1);
 
         if (palabraEncontrada) {
-            return "¡Felicidades " + nombreJugador + "! Has ganado. La palabra era: " + palabra;
+            return "¡Has ganado! La palabra era: " + palabra;
         }
 
         if (intentosPorJugador.get(clientId) >= intentosRestantes) {
-            return "Se acabaron los intentos, " + nombreJugador + ". La palabra era: " + palabra;
+            return "Se acabaron los intentos. La palabra era: " + palabra;
         }
 
-        return nombreJugador + ", tu resultado: " + result.toString();
-    }
-
-    private void sendMessage(String message, InetAddress ip, int port) throws IOException {
-        byte[] sendingData = message.getBytes();
-        DatagramPacket packet = new DatagramPacket(sendingData, sendingData.length, ip, port);
-        socket.send(packet);
+        return result.toString();
     }
 
     public static void main(String[] args) {
