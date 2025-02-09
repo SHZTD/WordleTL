@@ -24,7 +24,7 @@ public class SrvWordle {
     public void init(int port) throws SocketException {
         socket = new DatagramSocket(port);
         turnManager = new Turnos();
-        palabra = wordle.obtenerPalabra();
+        palabra = wordle.obtenerPalabra().trim();
         palabraArray = palabra.toCharArray();
         System.out.println("Palabra a adivinar: " + palabra);  // Debugging
     }
@@ -39,7 +39,7 @@ public class SrvWordle {
             clientPort = packet.getPort();
 
             String request = new String(packet.getData(), 0, packet.getLength()).trim();
-            String clientId = clientIP.toString() + ":" + clientPort;
+            String clientId = clientIP.getHostAddress() + ":" + clientPort;
 
             // Si el cliente es nuevo, registrar nombre y agregar a turnos
             if (!nombresPorJugador.containsKey(clientId)) {
@@ -61,18 +61,21 @@ public class SrvWordle {
             String response = processWordleLogic(request, clientId, nombreJugador);
             sendMessage(response, clientIP, clientPort);
 
-            // Notificar al siguiente jugador que es su turno
-            turnManager.nextTurn();
-            String siguienteJugadorId = turnManager.getCurrentPlayerId();
-            String siguienteJugadorNombre = nombresPorJugador.get(siguienteJugadorId);
-            InetAddress siguienteIP = InetAddress.getByName(siguienteJugadorId.split(":")[0].substring(1));
-            int siguientePort = Integer.parseInt(siguienteJugadorId.split(":")[1]);
-
-            sendMessage("Es tu turno, " + siguienteJugadorNombre + ". Introduce tu intento.", siguienteIP, siguientePort);
+            // Solo cambiar de turno si no ha ganado
+            if (!response.contains("¡Felicidades")) {
+                turnManager.nextTurn();
+                String siguienteJugadorId = turnManager.getCurrentPlayerId();
+                String siguienteJugadorNombre = nombresPorJugador.get(siguienteJugadorId);
+                InetAddress siguienteIP = InetAddress.getByName(siguienteJugadorId.split(":")[0]);
+                int siguientePort = Integer.parseInt(siguienteJugadorId.split(":")[1]);
+                sendMessage("Es tu turno, " + siguienteJugadorNombre + ". Introduce tu intento.", siguienteIP, siguientePort);
+            }
         }
     }
 
     private String processWordleLogic(String input, String clientId, String nombreJugador) {
+        input = input.trim(); // Asegurarse de eliminar espacios adicionales
+
         if (input.length() != palabraArray.length) {
             return "La palabra debe tener " + palabraArray.length + " letras.";
         }
