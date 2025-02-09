@@ -63,7 +63,7 @@ public class CliWordle {
     public static void main(String[] args) {
         try {
             CliWordle client = new CliWordle();
-            client.init("192.168.22.115", 7484);
+            client.init("localhost", 7484);
             client.runClient();
         } catch (IOException e) {
             e.printStackTrace();

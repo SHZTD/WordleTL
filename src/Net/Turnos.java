@@ -25,4 +25,8 @@ class Turnos {
     public void nextTurn() {
         currentTurnIndex = (currentTurnIndex + 1) % players.size();
     }
+
+    public String getCurrentPlayerId() {
+        return players.get(currentTurnIndex);
+    }
 }
