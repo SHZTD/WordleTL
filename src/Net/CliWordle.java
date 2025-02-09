@@ -3,13 +3,14 @@ package Net;
 import java.io.IOException;
 import java.net.*;
 import java.util.Scanner;
-
 public class CliWordle {
     private InetAddress serverIP;
     private int serverPort;
     private DatagramSocket socket;
     private Scanner sc;
     private String nombre;
+
+    private int intentos = 7;
 
     public CliWordle() {
         sc = new Scanner(System.in);
@@ -57,6 +58,7 @@ public class CliWordle {
     private byte[] getNextWordAttempt() {
         System.out.print("Introduce tu intento: ");
         String msg = sc.nextLine();
+        System.out.println("Intentos restantes ahora = " + intentos--);
         return msg.getBytes();
     }
 
@@ -70,3 +72,4 @@ public class CliWordle {
         }
     }
 }
+
